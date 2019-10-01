@@ -1,0 +1,71 @@
+body {
+	font-size: 12pt;
+	line-height: 1.75em;
+	font-family: sans-serif;
+	background: #030707 url('../images/grey.png');
+	color: #0a0b0b;
+}
+#bg {
+	background: url('../images/shadow.png') top left repeat-x;
+	padding: 10px 0 40px 0;
+}
+#searchResults {
+	max-height:800px;
+	overflow: scroll;
+}
+#jsonSection{
+	max-height:800px;
+	overflow: scroll;
+}
+.top{
+	margin-top: 1%;
+}
+
+#termSearch {
+	height: 40px;
+	border-radius: 7px;
+	border-color: #CFD4CF;
+	text-align: center;
+	width: 100%;
+	padding: 5px;
+	font-size: 15px;
+}
+
+#header {
+	position: relative;
+	padding: 10px 10px 0px 10px;
+	height: 60px;
+	width: 90%;
+}
+
+#logo {
+	top: 10px;
+	left: 10px;
+	height: 50px;
+	line-height: 50px;
+	text-align: left;
+}
+
+#logo a {
+	text-decoration: none;
+	color: #ffffff;
+}
+
+#logo h1 {
+	font-size: 2.75em;
+}
+
+#error {
+	display: none;
+	font-size: 120%;
+	text-align: center;
+	color: red;
+}
+
+#message {
+	display: none;
+	font-size: 120%;
+	color: #006600;
+	text-align: center;
+}
+
