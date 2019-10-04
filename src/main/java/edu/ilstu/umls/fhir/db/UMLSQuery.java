@@ -1,13 +1,12 @@
 package edu.ilstu.umls.fhir.db;
 
 import java.util.ArrayList;
-
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
@@ -25,27 +24,27 @@ public class UMLSQuery {
 
 	public enum Queries {
 
-		CUI_QUERY("SELECT c.CUI, STR, STY from umls2018.mrconso as c, umls2018.mrsty as s "
+		CUI_QUERY("SELECT c.CUI, STR, STY from umls.MRCONSO as c, umls.MRSTY as s "
 				+ "WHERE TS = 'P' AND STT='PF' AND ISPREF='Y' AND LAT='ENG' AND c.CUI = s.CUI AND STR LIKE ? LIMIT 200"),
 		MTH_QUERY(
-				"SELECT c.CUI, c.STR, s.STY FROM umls2018.mrconso as c, umls2018.mrsty as s WHERE c.CUI= ? AND TS = 'P' AND STT='PF' AND ISPREF = 'Y' AND c.cui = s.cui AND c.SAB='MTH'"),
+				"SELECT c.CUI, c.STR, s.STY FROM umls.MRCONSO as c, umls.MRSTY as s WHERE c.CUI= ? AND TS = 'P' AND STT='PF' AND ISPREF = 'Y' AND c.cui = s.cui AND c.SAB='MTH'"),
 		SAB_QUERY(
-				"SELECT c.CUI, c.STR, s.STY,c.SAB, sab.SVER FROM umls2018.mrconso as c, umls2018.mrsty as s, umls2018.mrsab as sab "
+				"SELECT c.CUI, c.STR, s.STY,c.SAB, sab.SVER FROM umls.MRCONSO as c, umls.MRSTY as s, umls.MRSAB as sab "
 						+ "WHERE c.CUI= ? AND c.cui = s.cui AND c.TS='P' and c.ISPREF = 'Y' and c.TS = 'P' and c.SUPPRESS = 'N' "
 						+ "AND c.SAB = sab.RSAB " + "order by sab.SVER DESC"),
 		MAPPING_QUERY(
-				"SELECT c.CUI, c.CODE, c.STR, s.STY, sab.RSAB,sab.SON, sab.SVER FROM umls2018.mrconso as c, umls2018.mrsty as s, umls2018.mrsab as sab "
+				"SELECT c.CUI, c.CODE, c.STR, s.STY, sab.RSAB,sab.SON, sab.SVER FROM umls.MRCONSO as c, umls.MRSTY as s, umls.MRSAB as sab "
 						+ "WHERE c.CUI= ? AND c.cui = s.cui AND TS='P' AND c.SAB<> 'MTH' AND c.SAB=sab.RSAB and sab.VCUI IS NOT NULL "
 						+ "GROUP BY c.str, sab.SON, sab.SVER ORDER BY sab.RSAB"),
 		RELATION_QUERY(
-				"SELECT CUI1, STR, REL, RELA, sab.RSAB, sab.SVER, sab.SON, RG FROM umls2018.MRREL as rel, umls2018.mrsab as sab, umls2018.MRCONSO c "
+				"SELECT CUI1, STR, REL, RELA, sab.RSAB, sab.SVER, sab.SON, RG FROM umls.MRREL as rel, umls.MRSAB as sab, umls.MRCONSO c "
 						+ "WHERE CUI2 = ? AND REL IN('RO','RU','SY','RL') AND SL = sab.RSAB AND sab.VCUI IS NOT NULL AND c.CUI = CUI1 "
 						+ "AND c.TS='P' AND c.ISPREF = 'Y' AND STT = 'PF' GROUP BY CUI1, REL, sab.RSAB ORDER BY sab.RSAB"),
 		HIERARCHY_QUERY(
-				"SELECT CUI1, c.STR, REL, sab.SON,sab.RSAB, sab.SVER, RG FROM umls2018.MRREL as rel, umls2018.mrsab as sab, umls2018.MRCONSO c "
+				"SELECT CUI1, c.STR, REL, sab.SON,sab.RSAB, sab.SVER, RG FROM umls.MRREL as rel, umls.MRSAB as sab, umls.MRCONSO c "
 						+ "WHERE CUI2 = ? AND REL IN('PAR','CHD') AND SL = sab.RSAB AND sab.VCUI IS NOT NULL AND c.CUI = CUI1 "
 						+ "AND c.TS='P' AND c.ISPREF = 'Y' AND STT = 'PF' AND c.SAB = 'MTH' ORDER BY CUI1"),
-		SEMANTIC_TYPE_QUERY("SELECT STY FROM umls2018.MRSTY WHERE CUI = ?");
+		SEMANTIC_TYPE_QUERY("SELECT STY FROM umls.MRSTY WHERE CUI = ?");
 
 		private String query;
 
@@ -55,7 +54,7 @@ public class UMLSQuery {
 
 	}
 
-	private static final Logger log = Logger.getLogger(UMLSQuery.class);
+	private static final Logger log = LogManager.getLogger(UMLSQuery.class);
 	private Session session = null;
 	private final IParser fhirJson = FhirContext.forR4().newJsonParser();
 	private UMLSFHIRModel model = UMLSFHIRModel.getDefaultFHIRModel();
@@ -113,11 +112,13 @@ public class UMLSQuery {
 				UMLSTargetElementComponent target = new UMLSTargetElementComponent();
 				target.setCode(o[1].toString()).setDisplay(o[2].toString())
 						.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
-				target.setAssertedBy(o[5].toString());
+				if(o[6]!=null)
+					target.setTargetVersion(o[6].toString());
+				target.setTargetName(o[5].toString());
 				targets.add(target);
 			}
-			//queryCUIRelationships(cui);
-			//queryCUIHierarchy(cui);
+			queryCUIRelationships(cui);
+			queryCUIHierarchy(cui);
 			System.out.println(fhirJson.encodeResourceToString(model));
 			HibernateConfig.closeSession(session);
 		} catch (Exception e) {
@@ -140,8 +141,8 @@ public class UMLSQuery {
 			for (Object[] o : results) {
 				if(o[3] == null)
 					o[3] = "N/A";
-				if (!tempCUI.equals(o[0].toString())
-						|| (tempCUI.equals(o[0].toString()) && !tempRELA.equals(o[3].toString()))) {
+				//if (!tempCUI.equals(o[0].toString())
+				//		|| (tempCUI.equals(o[0].toString()) && !tempRELA.equals(o[3].toString()))) {
 
 					ConceptMapGroupComponent g = groups.get(0);
 					UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
@@ -151,6 +152,8 @@ public class UMLSQuery {
 					target = new UMLSTargetElementComponent();
 					target.setCode(tempCUI);
 					target.setDisplay(o[1].toString());
+					target.setTargetVersion(o[5].toString());
+					target.setTargetName(o[6].toString());
 					target.setEquivalence(ConceptMapEquivalence.RELATEDTO);
 					if (o[3] != null) {
 						tempRELA = o[3].toString();
@@ -162,12 +165,12 @@ public class UMLSQuery {
 							.setParameter(1, o[0].toString()).list();
 					for (String st : tempST)
 						target.setSemanticType(st);
-					target.setAssertedBy(o[4].toString());
+					//target.setAssertedBy(o[4].toString());
 					targets.add(target);
-				} else {
-					target.setAssertedBy(o[4].toString());
-				}
-			}
+				}// else {
+				//	target.setAssertedBy(o[4].toString());
+				//}
+			//}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -182,8 +185,8 @@ public class UMLSQuery {
 			String tempREL = "!";
 			UMLSTargetElementComponent target = null;
 			for (Object[] o : results) {
-				if (!tempCUI.equals(o[0].toString())
-						|| (tempCUI.equals(o[0].toString()) && !tempREL.equals(o[2].toString()))) {
+				//if (!tempCUI.equals(o[0].toString())
+				//		|| (tempCUI.equals(o[0].toString()) && !tempREL.equals(o[2].toString()))) {
 
 					ConceptMapGroupComponent g = groups.get(0);
 					UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
@@ -193,6 +196,8 @@ public class UMLSQuery {
 					target = new UMLSTargetElementComponent();
 					target.setCode(tempCUI);
 					target.setDisplay(o[1].toString());
+					target.setTargetVersion(o[5].toString());
+					target.setTargetName(o[3].toString());
 					tempREL = o[2].toString();
 					if (tempREL.equals("CHD"))
 						target.setEquivalence(ConceptMapEquivalence.SPECIALIZES);
@@ -202,11 +207,11 @@ public class UMLSQuery {
 							.setParameter(1, o[0].toString()).list();
 					for (String st : tempST)
 						target.setSemanticType(st);
-					target.setAssertedBy(o[3].toString());
+					//target.setAssertedBy(o[3].toString());
 					targets.add(target);
-				} else {
-					target.setAssertedBy(o[3].toString());
-				}
+				//} else {
+					//target.setAssertedBy(o[3].toString());
+				//}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

@@ -2,7 +2,8 @@ package edu.ilstu.umls.fhir.db;
 
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -12,7 +13,7 @@ import org.hibernate.service.ServiceRegistry;
 
 public class HibernateConfig {
 
-	private static final Logger log = Logger.getLogger(HibernateConfig.class);
+	private static final Logger log = LogManager.getLogger(HibernateConfig.class);
 
 	private  static SessionFactory sessionFactory = null;
 
@@ -72,9 +73,9 @@ public class HibernateConfig {
 	private static Properties getHibernateProperties() {
 		Properties p = new Properties();
 		p.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
-		p.put(Environment.URL, "jdbc:mysql://localhost:3306/umls2018");
+		p.put(Environment.URL, "jdbc:mysql://10.110.10.130:3306/umls");
 		p.put(Environment.USER, "root");
-		p.put(Environment.PASS, "rishi");
+		p.put(Environment.PASS, "umls");
 		p.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
 		p.put(Environment.SHOW_SQL, false);
 		p.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");

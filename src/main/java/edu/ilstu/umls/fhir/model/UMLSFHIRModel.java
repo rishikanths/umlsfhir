@@ -37,7 +37,7 @@ public class UMLSFHIRModel extends ConceptMap {
 		private static final long serialVersionUID = 1;
 
 		@Child(name = "semanticType", type = {CodeType.class }, min = 0, max = 6, modifier=false, summary=false)
-		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-code-semantictype", definedLocally=false, isModifier=false)
+		@Extension(url="http://hl7.org/fhir/StructureDefinition/concept-code-semantictype", definedLocally=false, isModifier=false)
 		@Description(shortDefinition = "Identifies semantic type of the element", formalDefinition = "Identity the semantic type of the element/item being mapped.")
 		protected List<StringType> semanticType;
 		
@@ -60,17 +60,22 @@ public class UMLSFHIRModel extends ConceptMap {
 		private static final long serialVersionUID = 1;
 
 		@Child(name = "assertedBy", type = {StringType.class}, min = 0, max = 1)
-		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-mapping-assertedby", definedLocally=false, isModifier=false)
+		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-taget-assertedby", definedLocally=false, isModifier=false)
 		@Description(shortDefinition = "Provides context to the mappings", formalDefinition = "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.")
 		protected List<StringType> assertedBy;
 		
+		@Child(name = "name", type = {StringType.class}, min = 1, max = 1)
+		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-target-name", definedLocally=false, isModifier=false)
+		@Description(shortDefinition = "Provides context to the mappings", formalDefinition = "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.")
+		protected StringType name;
+		
 		@Child(name = "uri", type = {UriType.class}, min = 0, max = 1)
-		@Extension(url="http://hl7.org/fhir/StructureDefinition/target-uri", definedLocally=false, isModifier=false)
+		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-target-uri", definedLocally=false, isModifier=false)
 		@Description(shortDefinition = "Target URI", formalDefinition = "The target source URI.")
-		protected UriType uri;
+		protected UriType url;
 		
 		@Child(name = "version", type = {StringType.class}, min = 0, max = 1)
-		@Extension(url="http://hl7.org/fhir/StructureDefinition/target-version", definedLocally=false, isModifier=false)
+		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-target-version", definedLocally=false, isModifier=false)
 		@Description(shortDefinition = "Target version", formalDefinition = "The version of the target terminology.")
 		protected StringType version;
 		
@@ -80,9 +85,9 @@ public class UMLSFHIRModel extends ConceptMap {
 		protected List<StringType> semanticType;
 
 		@Child(name = "relationshipLabel", type = {StringType.class}, min = 0, max = 1)
-		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-mapping-relation", definedLocally=false, isModifier=false)
+		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-target-mappingLabel", definedLocally=false, isModifier=false)
 		@Description(shortDefinition = "", formalDefinition = "The relationship label between the source and target concepts. The relationship is read from target to source (e.g. the target 'has manifestation' source).")
-		protected StringType relationshipLabel;
+		protected StringType mappingLabel;
 		
 		public List<StringType> getSemanticType(StringType type) {
 			return semanticType;
@@ -97,17 +102,22 @@ public class UMLSFHIRModel extends ConceptMap {
 		}
 		
 		public UMLSTargetElementComponent setTargetURI(String u) {
-			uri = new UriType(u);
+			url = new UriType(u);
 			return this;
 		}
 		
 		public UMLSTargetElementComponent setTargetURI(UriType u) {
-			uri = u.copy();
+			url = u.copy();
 			return this;
 		}
 		
 		public UMLSTargetElementComponent setTargetVersion(String version) {
 			this.version = new StringType(version);
+			return this;
+		}
+		
+		public UMLSTargetElementComponent setTargetName(String name) {
+			this.name = new StringType(name);
 			return this;
 		}
 		
@@ -123,13 +133,13 @@ public class UMLSFHIRModel extends ConceptMap {
 		}
 		
 		public StringType getRelationshipLabel(StringType type) {
-			return relationshipLabel;
+			return mappingLabel;
 		}
 		
 		public UMLSTargetElementComponent setRelationshipLabel(String type) {
-			if(relationshipLabel == null)
-				relationshipLabel = new StringType();
-			relationshipLabel.setValueAsString(type);
+			if(mappingLabel == null)
+				mappingLabel = new StringType();
+			mappingLabel.setValueAsString(type);
 			return this;
 		}
 	}
@@ -158,8 +168,6 @@ public class UMLSFHIRModel extends ConceptMap {
 		List<ContactDetail> contactDetails = new ArrayList<ContactDetail>();
 		contactDetails.add(cd);
 		model.setContact(contactDetails);
-		
-		model.setSource(new UriType().setValue("http://nlm.nih.gov/research/umls"));
 		
 		ConceptMapGroupComponent group = new ConceptMapGroupComponent();
 		group.setSource("http://nlm.nih.gov/research/umls");

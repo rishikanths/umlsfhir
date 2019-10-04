@@ -1,8 +1,8 @@
 package edu.ilstu.umls.fhir.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Server;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -15,7 +15,7 @@ public class UMLSFHIRServer {
 	private FhirContext ourCtx;
 	private IGenericClient ourClient;
 
-	private static final Logger log = LoggerFactory.getLogger("systemLogger"); 
+	private static final Logger log = LogManager.getLogger("UMLSFHIRServer"); 
 	
 	public static void main(String args[]) {
 		
