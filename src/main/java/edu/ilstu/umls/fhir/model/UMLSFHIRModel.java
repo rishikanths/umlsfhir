@@ -58,12 +58,12 @@ public class UMLSFHIRModel extends ConceptMap {
 	public static class UMLSTargetElementComponent extends TargetElementComponent {
 		
 		private static final long serialVersionUID = 1;
-
+		/*
 		@Child(name = "assertedBy", type = {StringType.class}, min = 0, max = Child.MAX_UNLIMITED)
 		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-taget-assertedby", definedLocally=false, isModifier=false)
 		@Description(shortDefinition = "Mapping is asserted by target", formalDefinition = "The mapping is asserted in one or more target sources.")
 		protected List<StringType> assertedBy;
-		
+		*/
 		@Child(name = "name", type = {StringType.class}, min = 1, max = 1)
 		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-target-name", definedLocally=false, isModifier=false)
 		@Description(shortDefinition = "Name of the target standard", formalDefinition = "The fully qualified name of the target source standard.")
@@ -120,7 +120,7 @@ public class UMLSFHIRModel extends ConceptMap {
 			this.name = new StringType(name);
 			return this;
 		}
-		
+		/*
 		public List<StringType> getAssertedBy() {
 			return assertedBy;
 		}
@@ -131,7 +131,7 @@ public class UMLSFHIRModel extends ConceptMap {
 			assertedBy.add(new StringType(name));
 			return this;
 		}
-		
+		*/
 		public StringType getRelationshipLabel(StringType type) {
 			return mappingLabel;
 		}
