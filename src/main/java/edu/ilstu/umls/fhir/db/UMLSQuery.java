@@ -43,7 +43,7 @@ public class UMLSQuery {
 		HIERARCHY_QUERY(
 				"SELECT CUI1, c.STR, REL, sab.SON,sab.RSAB, sab.SVER, RG FROM umls.MRREL as rel, umls.MRSAB as sab, umls.MRCONSO c "
 						+ "WHERE CUI2 = ? AND REL IN('PAR','CHD') AND SL = sab.RSAB AND sab.VCUI IS NOT NULL AND c.CUI = CUI1 "
-						+ "AND c.TS='P' AND c.ISPREF = 'Y' AND STT = 'PF' AND c.SAB = 'MTH' ORDER BY CUI1"),
+						+ "AND c.TS='P' AND c.ISPREF = 'Y' AND STT = 'PF' GROUP BY CUI1, REL ORDER BY CUI1"),
 		SEMANTIC_TYPE_QUERY("SELECT STY FROM umls.MRSTY WHERE CUI = ?");
 
 		private String query;
@@ -83,54 +83,64 @@ public class UMLSQuery {
 		return map;
 	}
 
-	public String queryCUIMapping(String cui) {
+	public String queryCUI(String cui, char type) {
+		session = HibernateConfig.getSession();
+		model.setUrl(model.getUrl() + cui);
+		ConceptMapGroupComponent g = model.getGroup().get(0);
+		UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
+		List<TargetElementComponent> targets = new ArrayList();
+		source.setTarget(targets);
+
+		List<Object[]> temp = session.createNativeQuery(Queries.MTH_QUERY.query).setParameter(1, cui).list();
+		if (temp.size() == 0) {
+			temp = session.createNativeQuery(Queries.SAB_QUERY.query).setParameter(1, cui).list();
+			g.setSource("http://nlm.nih.gov/research/umls/" + temp.get(0)[3].toString());
+		} else {
+			g.setSource("http://nlm.nih.gov/research/umls");
+			g.setSourceVersion("2018AA");
+		}
+		source.setDisplay(temp.get(0)[1].toString()).setCode(temp.get(0)[0].toString());
+		source.setSemanticType(new StringType(temp.get(0)[2].toString()));
+
+		if (type == 'a') {
+			queryCUIMapping(cui);
+			queryCUIHierarchy(cui);
+			queryCUIRelationships(cui);
+		} else if (type == 'c') {
+			queryCUIMapping(cui);
+		} else if (type == 'h') {
+			queryCUIHierarchy(cui);
+		} else if (type == 'r') {
+			queryCUIRelationships(cui);
+		}
+		HibernateConfig.closeSession(session);
+		return fhirJson.encodeResourceToString(model);
+	}
+
+	private void queryCUIMapping(String cui) {
 		try {
-			session = HibernateConfig.getSession();
-			model.setUrl(model.getUrl()+cui);
 			List<Object[]> results = session.createNativeQuery(Queries.MAPPING_QUERY.query).setParameter(1, cui).list();
-			boolean first = true;
 			ConceptMapGroupComponent g = model.getGroup().get(0);
 			UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
 			List<TargetElementComponent> targets = new ArrayList();
 			source.setTarget(targets);
 			for (Object[] o : results) {
-				if (first) {
-					List<Object[]> temp = session.createNativeQuery(Queries.MTH_QUERY.query).setParameter(1, cui)
-							.list();
-					if (temp.size() == 0) {
-						temp = session.createNativeQuery(Queries.SAB_QUERY.query).setParameter(1, cui).list();
-						g.setSource("http://nlm.nih.gov/research/umls/" + temp.get(0)[3].toString());
-					} else {
-						g.setSource("http://nlm.nih.gov/research/umls");
-						g.setSourceVersion("2018AA");
-					}
-					source.setDisplay(temp.get(0)[1].toString()).setCode(temp.get(0)[0].toString());
-					source.setSemanticType(new StringType(temp.get(0)[2].toString()));
-					first = false;
-				}
-
 				UMLSTargetElementComponent target = new UMLSTargetElementComponent();
 				target.setCode(o[1].toString()).setDisplay(o[2].toString())
 						.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
-				if(o[6]!=null)
+				if (o[6] != null)
 					target.setTargetVersion(o[6].toString());
 				target.setTargetName(o[5].toString());
 				targets.add(target);
 			}
-			queryCUIRelationships(cui);
-			queryCUIHierarchy(cui);
-			System.out.println(fhirJson.encodeResourceToString(model));
-			HibernateConfig.closeSession(session);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 			session.getTransaction().rollback();
 			log.error(e.getMessage(), e);
 		}
-		return fhirJson.encodeResourceToString(model);
-
 	}
 
-	public void queryCUIRelationships(String cui) {
+	private void queryCUIRelationships(String cui) {
 		try {
 			List<Object[]> results = session.createNativeQuery(Queries.RELATION_QUERY.query).setParameter(1, cui)
 					.list();
@@ -139,44 +149,44 @@ public class UMLSQuery {
 			String tempRELA = "!";
 			UMLSTargetElementComponent target = null;
 			for (Object[] o : results) {
-				if(o[3] == null)
+				if (o[3] == null)
 					o[3] = "N/A";
-				//if (!tempCUI.equals(o[0].toString())
-				//		|| (tempCUI.equals(o[0].toString()) && !tempRELA.equals(o[3].toString()))) {
+				// if (!tempCUI.equals(o[0].toString())
+				// || (tempCUI.equals(o[0].toString()) && !tempRELA.equals(o[3].toString()))) {
 
-					ConceptMapGroupComponent g = groups.get(0);
-					UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
-					List<TargetElementComponent> targets = source.getTarget();
+				ConceptMapGroupComponent g = groups.get(0);
+				UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
+				List<TargetElementComponent> targets = source.getTarget();
 
-					tempCUI = o[0].toString();
-					target = new UMLSTargetElementComponent();
-					target.setCode(tempCUI);
-					target.setDisplay(o[1].toString());
-					target.setTargetVersion(o[5].toString());
-					target.setTargetName(o[6].toString());
-					target.setEquivalence(ConceptMapEquivalence.RELATEDTO);
-					if (o[3] != null) {
-						tempRELA = o[3].toString();
-						target.setRelationshipLabel(tempRELA);
-					} else {
-						target.setRelationshipLabel("");
-					}
-					List<String> tempST = session.createNativeQuery(Queries.SEMANTIC_TYPE_QUERY.query)
-							.setParameter(1, o[0].toString()).list();
-					for (String st : tempST)
-						target.setSemanticType(st);
-					//target.setAssertedBy(o[4].toString());
-					targets.add(target);
-				}// else {
-				//	target.setAssertedBy(o[4].toString());
-				//}
-			//}
+				tempCUI = o[0].toString();
+				target = new UMLSTargetElementComponent();
+				target.setCode(tempCUI);
+				target.setDisplay(o[1].toString());
+				target.setTargetVersion(o[5].toString());
+				target.setTargetName(o[6].toString());
+				target.setEquivalence(ConceptMapEquivalence.RELATEDTO);
+				if (o[3] != null) {
+					tempRELA = o[3].toString();
+					target.setRelationshipLabel(tempRELA);
+				} else {
+					target.setRelationshipLabel("");
+				}
+				List<String> tempST = session.createNativeQuery(Queries.SEMANTIC_TYPE_QUERY.query)
+						.setParameter(1, o[0].toString()).list();
+				for (String st : tempST)
+					target.setSemanticType(st);
+				// target.setAssertedBy(o[4].toString());
+				targets.add(target);
+			} // else {
+				// target.setAssertedBy(o[4].toString());
+				// }
+			// }
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 	}
 
-	public void queryCUIHierarchy(String cui) {
+	private void queryCUIHierarchy(String cui) {
 		try {
 			List<Object[]> results = session.createNativeQuery(Queries.HIERARCHY_QUERY.query).setParameter(1, cui)
 					.list();
@@ -185,33 +195,33 @@ public class UMLSQuery {
 			String tempREL = "!";
 			UMLSTargetElementComponent target = null;
 			for (Object[] o : results) {
-				//if (!tempCUI.equals(o[0].toString())
-				//		|| (tempCUI.equals(o[0].toString()) && !tempREL.equals(o[2].toString()))) {
+				// if (!tempCUI.equals(o[0].toString())
+				// || (tempCUI.equals(o[0].toString()) && !tempREL.equals(o[2].toString()))) {
 
-					ConceptMapGroupComponent g = groups.get(0);
-					UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
-					List<TargetElementComponent> targets = source.getTarget();
+				ConceptMapGroupComponent g = groups.get(0);
+				UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
+				List<TargetElementComponent> targets = source.getTarget();
 
-					tempCUI = o[0].toString();
-					target = new UMLSTargetElementComponent();
-					target.setCode(tempCUI);
-					target.setDisplay(o[1].toString());
-					target.setTargetVersion(o[5].toString());
-					target.setTargetName(o[3].toString());
-					tempREL = o[2].toString();
-					if (tempREL.equals("CHD"))
-						target.setEquivalence(ConceptMapEquivalence.SPECIALIZES);
-					else
-						target.setEquivalence(ConceptMapEquivalence.SUBSUMES);
-					List<String> tempST = session.createNativeQuery(Queries.SEMANTIC_TYPE_QUERY.query)
-							.setParameter(1, o[0].toString()).list();
-					for (String st : tempST)
-						target.setSemanticType(st);
-					//target.setAssertedBy(o[3].toString());
-					targets.add(target);
-				//} else {
-					//target.setAssertedBy(o[3].toString());
-				//}
+				tempCUI = o[0].toString();
+				target = new UMLSTargetElementComponent();
+				target.setCode(tempCUI);
+				target.setDisplay(o[1].toString());
+				target.setTargetVersion(o[5].toString());
+				target.setTargetName(o[3].toString());
+				tempREL = o[2].toString();
+				if (tempREL.equals("CHD"))
+					target.setEquivalence(ConceptMapEquivalence.SPECIALIZES);
+				else
+					target.setEquivalence(ConceptMapEquivalence.SUBSUMES);
+				List<String> tempST = session.createNativeQuery(Queries.SEMANTIC_TYPE_QUERY.query)
+						.setParameter(1, o[0].toString()).list();
+				for (String st : tempST)
+					target.setSemanticType(st);
+				// target.setAssertedBy(o[3].toString());
+				targets.add(target);
+				// } else {
+				// target.setAssertedBy(o[3].toString());
+				// }
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

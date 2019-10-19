@@ -26,8 +26,12 @@ public class SearchByCUI extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 		log.info("Searching for - "+request.getParameter("cui"));
 		try {
-
-			String modelasJson = new UMLSQuery().queryCUIMapping(request.getParameter("cui"));
+			char type = ' ';
+			if(request.getParameter("type") == null)
+				type='a';
+			else
+				type = request.getParameter("type").charAt(0);
+			String modelasJson = new UMLSQuery().queryCUI(request.getParameter("cui"), type);
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
 			response.getWriter().write(modelasJson);

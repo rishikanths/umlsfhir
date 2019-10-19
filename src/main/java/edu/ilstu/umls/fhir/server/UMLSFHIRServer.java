@@ -31,7 +31,6 @@ public class UMLSFHIRServer {
 		
 		//UMLSQuery.searchByString("mala");
 		UMLSQuery q = new UMLSQuery();
-		q.queryCUIMapping("C0004238");
 		//q.queryCUIHierarchy("C0004238");
 		//q.queryCUIRelationships("C0004238", false);
 		/*ourPort = RandomServerPortProvider.findFreePort();

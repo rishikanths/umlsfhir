@@ -38,7 +38,7 @@ public class UMLSFHIRModel extends ConceptMap {
 
 		@Child(name = "semanticType", type = {CodeType.class }, min = 0, max = 6, modifier=false, summary=false)
 		@Extension(url="http://hl7.org/fhir/StructureDefinition/concept-code-semantictype", definedLocally=false, isModifier=false)
-		@Description(shortDefinition = "Identifies semantic type of the element", formalDefinition = "Identity the semantic type of the element/item being mapped.")
+		@Description(shortDefinition = "Identifies semantic type of the element", formalDefinition = "Identities the semantic type of the element/code being mapped.")
 		protected List<StringType> semanticType;
 		
 		public List<StringType> getSemanticType(StringType type) {
@@ -59,14 +59,14 @@ public class UMLSFHIRModel extends ConceptMap {
 		
 		private static final long serialVersionUID = 1;
 
-		@Child(name = "assertedBy", type = {StringType.class}, min = 0, max = 1)
+		@Child(name = "assertedBy", type = {StringType.class}, min = 0, max = Child.MAX_UNLIMITED)
 		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-taget-assertedby", definedLocally=false, isModifier=false)
-		@Description(shortDefinition = "Provides context to the mappings", formalDefinition = "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.")
+		@Description(shortDefinition = "Mapping is asserted by target", formalDefinition = "The mapping is asserted in one or more target sources.")
 		protected List<StringType> assertedBy;
 		
 		@Child(name = "name", type = {StringType.class}, min = 1, max = 1)
 		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-target-name", definedLocally=false, isModifier=false)
-		@Description(shortDefinition = "Provides context to the mappings", formalDefinition = "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.")
+		@Description(shortDefinition = "Name of the target standard", formalDefinition = "The fully qualified name of the target source standard.")
 		protected StringType name;
 		
 		@Child(name = "uri", type = {UriType.class}, min = 0, max = 1)
@@ -86,7 +86,7 @@ public class UMLSFHIRModel extends ConceptMap {
 
 		@Child(name = "relationshipLabel", type = {StringType.class}, min = 0, max = 1)
 		@Extension(url="http://hl7.org/fhir/StructureDefinition/conceptmap-target-mappingLabel", definedLocally=false, isModifier=false)
-		@Description(shortDefinition = "", formalDefinition = "The relationship label between the source and target concepts. The relationship is read from target to source (e.g. the target 'has manifestation' source).")
+		@Description(shortDefinition = "Nature of the mapping between source and target", formalDefinition = "The relationship label between the source and target concepts. The relationship is read from target to source (e.g. the target 'has manifestation' source).")
 		protected StringType mappingLabel;
 		
 		public List<StringType> getSemanticType(StringType type) {

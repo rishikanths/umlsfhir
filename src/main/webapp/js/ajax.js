@@ -10,6 +10,13 @@ function reset(){
     $("#copyButton").css("display","none");
     $('#myTree').empty();
 }
+$(document).ready(function(){
+	$('#typeOptions .btn').on('click', function(event) {
+		if(document.getElementsByClassName("list-group-item-action active")[0]!=null){
+			getConceptMap(document.getElementsByClassName("list-group-item-action active")[0].id,$(this).find('input').val())
+		}
+	});
+})
 
 $("#termSearch").autocomplete(
 {
@@ -35,8 +42,7 @@ $("#termSearch").autocomplete(
 				        $(this).addClass('active').siblings().removeClass('active');
 				        $("#conceptInfo .card-body").empty()
 				        $("#conceptInfo .card-body").append("<span>ConceptMap for <b>"+$(this).text() +"("+$(this).attr('id')+")</b></span>") ;
-				        getConceptMap($(this).attr('id'));
-				        $("#jsonSection").LoadingOverlay("show");
+				        getConceptMap($(this).attr('id'),$("input[name='options']:checked").val());
 				    });
 				}
 				
@@ -54,9 +60,10 @@ $("#termSearch").autocomplete(
 	}
 });
 
-function getConceptMap(cui){
+function getConceptMap(cui,type){
+
 	$.ajax({
-		url : '/umls-fhir/mapcui?cui=' + cui+'&type = a',
+		url : '/umls-fhir/mapcui?cui='+cui+'&type='+type,
 		success : function(data, status, response) {
 			$("#jsonSection").LoadingOverlay("hide");
 			$("#copyButton").css("display","inline");
@@ -64,7 +71,8 @@ function getConceptMap(cui){
 			$('#myTree').jsonViewer(data,{collapsed: true, rootCollapsable:false, withQuotes: true, withLinks: false});
 		},
 		beforeSend : function() {
-			reset()
+			reset();
+			$("#jsonSection").LoadingOverlay("show");
 		},
 		error : function(data, status, response) {
 			var error = "Response - " + JSON.stringify(response)+ "\nStatus - " + JSON.stringify(status);
@@ -74,7 +82,7 @@ function getConceptMap(cui){
 	})
 }
 document.getElementById("copyButton").addEventListener("click", function() {
-	var clipboard = new ClipboardJS('.btn', {
+	var clipboard = new ClipboardJS('#copyContent .btn', {
 	    text: function() {
 	        return JSON.stringify(jsonObj)
 	    }
