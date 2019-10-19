@@ -43,7 +43,7 @@ public class UMLSQuery {
 		HIERARCHY_QUERY(
 				"SELECT CUI1, c.STR, REL, sab.SON,sab.RSAB, sab.SVER, RG FROM umls.MRREL as rel, umls.MRSAB as sab, umls.MRCONSO c "
 						+ "WHERE CUI2 = ? AND REL IN('PAR','CHD') AND SL = sab.RSAB AND sab.VCUI IS NOT NULL AND c.CUI = CUI1 "
-						+ "AND c.TS='P' AND c.ISPREF = 'Y' AND STT = 'PF' GROUP BY CUI1, REL, sab.RSAB ORDER BY CUI1"),
+						+ "AND c.TS='P' AND c.ISPREF = 'Y' AND STT = 'PF' GROUP BY CUI1, REL ORDER BY CUI1"),
 		SEMANTIC_TYPE_QUERY("SELECT STY FROM umls.MRSTY WHERE CUI = ?");
 
 		private String query;
