@@ -154,6 +154,7 @@ public class UMLSFHIRModel extends ConceptMap {
 
 		model.setUrl("http://umls.it.ilstu.edu/umlsfhir/ConceptMap/");
 		model.setVersion("1.0");
+
 		model.setStatus(PublicationStatus.DRAFT);
 		model.setExperimental(true);
 		model.setPublisher("Rishi Saripalle - Illinois State University");

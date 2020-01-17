@@ -26,18 +26,13 @@ public class ConceptMapProvider implements IResourceProvider {
         return ConceptMap.class;
     }
 
-    @Search
-    public ConceptMap searchCUI(@RequiredParam(name = ConceptMap.SP_SOURCE_CODE) StringParam id) {
-        String code = id.getValue();
-        log.info("Preparing ConceptMap for CUI - " + code);
-        try {
-            return new UMLSQuery().getModel(code, 'a');
-        } catch (Exception e) {
-            log.error(e.getMessage(), e.getCause());
-        }
-        return null;
-    }
-
+    /*
+     * @Search public ConceptMap searchCUI(@RequiredParam(name =
+     * ConceptMap.SP_SOURCE_CODE) StringParam id) { String code = id.getValue();
+     * log.info("Preparing ConceptMap for CUI - " + code); try { return new
+     * UMLSQuery().getModel(code, 'a'); } catch (Exception e) {
+     * log.error(e.getMessage(), e.getCause()); } return null; }
+     */
     @Read
     public ConceptMap getCUIMappings(@IdParam IdType id) {
         String code = id.getIdPart();

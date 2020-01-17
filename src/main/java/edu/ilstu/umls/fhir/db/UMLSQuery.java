@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.StringType;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import edu.ilstu.umls.fhir.model.UMLSFHIRModel;
 import edu.ilstu.umls.fhir.model.UMLSFHIRModel.UMLSSourceElementComponent;
 import edu.ilstu.umls.fhir.model.UMLSFHIRModel.UMLSTargetElementComponent;
@@ -57,7 +55,6 @@ public class UMLSQuery {
 
 	private static final Logger log = LoggerFactory.getLogger(UMLSQuery.class);
 	private Session session = null;
-	private final IParser fhirJson = FhirContext.forR4().newJsonParser();
 	private UMLSFHIRModel model = UMLSFHIRModel.getDefaultFHIRModel();
 
 	public UMLSFHIRModel getModel() {
@@ -87,6 +84,7 @@ public class UMLSQuery {
 	public ConceptMap getModel(String cui, char type) {
 		session = HibernateConfig.getSession();
 		model.setUrl(model.getUrl() + cui);
+		model.setId(cui);
 		ConceptMapGroupComponent g = model.getGroup().get(0);
 		UMLSSourceElementComponent source = (UMLSSourceElementComponent) g.getElement().get(0);
 		List<TargetElementComponent> targets = new ArrayList();

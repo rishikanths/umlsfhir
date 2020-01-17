@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class UMLSFHIRTest {
@@ -18,7 +17,7 @@ public class UMLSFHIRTest {
 	@Test
 	public void getConceptMap() {
 		try {
-			url = new URL("http://localhost:8080/umls-fhir/mapcui?cui=C1710490");
+			url = new URL("http://localhost:9090/umlsfhir/ConceptMap/C1710490");
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
