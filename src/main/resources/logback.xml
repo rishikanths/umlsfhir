@@ -1,0 +1,35 @@
+<configuration scan="true" scanPeriod="30 seconds">
+    <property name="HOME_LOG" value="logs/app.log" />
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss} %c{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HOME_LOG}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>2GB</totalSizeCap>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss} %c{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="ca.uhn" level="ERROR" additivity="false">
+        <appender-ref ref="FILE-ROLLING" />
+    </logger>
+    <logger name="edu.ilstu.umls" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE-ROLLING" />
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="FILE-ROLLING" />
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

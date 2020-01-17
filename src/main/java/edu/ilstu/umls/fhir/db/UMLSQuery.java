@@ -5,12 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.StringType;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -54,7 +55,7 @@ public class UMLSQuery {
 
 	}
 
-	private static final Logger log = LogManager.getLogger(UMLSQuery.class);
+	private static final Logger log = LoggerFactory.getLogger(UMLSQuery.class);
 	private Session session = null;
 	private final IParser fhirJson = FhirContext.forR4().newJsonParser();
 	private UMLSFHIRModel model = UMLSFHIRModel.getDefaultFHIRModel();
@@ -83,7 +84,7 @@ public class UMLSQuery {
 		return map;
 	}
 
-	public String queryCUI(String cui, char type) {
+	public ConceptMap getModel(String cui, char type) {
 		session = HibernateConfig.getSession();
 		model.setUrl(model.getUrl() + cui);
 		ConceptMapGroupComponent g = model.getGroup().get(0);
@@ -114,7 +115,7 @@ public class UMLSQuery {
 			queryCUIRelationships(cui);
 		}
 		HibernateConfig.closeSession(session);
-		return fhirJson.encodeResourceToString(model);
+		return model;
 	}
 
 	private void queryCUIMapping(String cui) {
@@ -180,7 +181,7 @@ public class UMLSQuery {
 			} // else {
 				// target.setAssertedBy(o[4].toString());
 				// }
-			// }
+				// }
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

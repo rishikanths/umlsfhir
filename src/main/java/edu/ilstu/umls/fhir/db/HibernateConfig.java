@@ -2,25 +2,25 @@ package edu.ilstu.umls.fhir.db;
 
 import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.service.ServiceRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HibernateConfig {
 
-	private static final Logger log = LogManager.getLogger(HibernateConfig.class);
+	private static final Logger log = LoggerFactory.getLogger(HibernateConfig.class);
 
-	private  static SessionFactory sessionFactory = null;
+	private static SessionFactory sessionFactory = null;
 
 	private static ServiceRegistry reg = null;
 
 	public static void buildSessionFactory() {
-		if(sessionFactory ==null) {
+		if (sessionFactory == null) {
 			log.info("Creating the session factory");
 			Configuration cfg = null;
 			try {
@@ -38,38 +38,38 @@ public class HibernateConfig {
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
-		}catch (Exception e) {
-			log.error(e.getMessage(),e);
-		}catch (Throwable t) {
-			log.error(t.getMessage(),t);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		} catch (Throwable t) {
+			log.error(t.getMessage(), t);
 		}
 		if (session == null) {
 			log.error("Session is not instantiated");
 		}
 		return session;
 	}
-	
+
 	public static void closeSession(Session session) {
 		try {
 			session.close();
-		}catch (Exception e) {
-			log.error(e.getMessage(),e);
-		}catch (Throwable t) {
-			log.error(t.getMessage(),t);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		} catch (Throwable t) {
+			log.error(t.getMessage(), t);
 		}
 	}
-	
+
 	public static void closeSessionFactory() {
 		try {
 			sessionFactory.close();
 			log.info("Successfully closed the session factory");
-		}catch (Exception e) {
-			log.error(e.getMessage(),e);
-		}catch (Throwable t) {
-			log.error(t.getMessage(),t);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		} catch (Throwable t) {
+			log.error(t.getMessage(), t);
 		}
 	}
-	
+
 	private static Properties getHibernateProperties() {
 		Properties p = new Properties();
 		p.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
@@ -80,12 +80,12 @@ public class HibernateConfig {
 		p.put(Environment.SHOW_SQL, false);
 		p.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
 		p.put(Environment.GENERATE_STATISTICS, false);
-		
+
 		p.put(Environment.C3P0_ACQUIRE_INCREMENT, 1);
 		p.put(Environment.C3P0_MIN_SIZE, 5);
 		p.put(Environment.C3P0_MAX_SIZE, 10);
 		p.put(Environment.C3P0_IDLE_TEST_PERIOD, 3000);
-		
+		p.put(Environment.C3P0_TIMEOUT, 0);
 		return p;
 	}
 
