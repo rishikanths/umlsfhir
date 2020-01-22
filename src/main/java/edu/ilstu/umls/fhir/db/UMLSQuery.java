@@ -1,9 +1,7 @@
 package edu.ilstu.umls.fhir.db;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.Session;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
@@ -11,8 +9,11 @@ import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 
 import edu.ilstu.umls.fhir.model.UMLSFHIRModel;
 import edu.ilstu.umls.fhir.model.UMLSFHIRModel.UMLSSourceElementComponent;
@@ -24,13 +25,12 @@ public class UMLSQuery {
 	public enum Queries {
 
 		CUI_QUERY("SELECT c.CUI, STR, STY from umls.MRCONSO as c, umls.MRSTY as s "
-				+ "WHERE TS = 'P' AND STT='PF' AND ISPREF='Y' AND LAT='ENG' AND c.CUI = s.CUI AND STR LIKE ? LIMIT 200"),
+				+ "WHERE LAT='ENG' AND c.CUI = s.CUI AND STR LIKE ? GROUP BY c.CUI ORDER BY c.STR ASC"),
 		MTH_QUERY(
 				"SELECT c.CUI, c.STR, s.STY FROM umls.MRCONSO as c, umls.MRSTY as s WHERE c.CUI= ? AND TS = 'P' AND STT='PF' AND ISPREF = 'Y' AND c.cui = s.cui AND c.SAB='MTH'"),
 		SAB_QUERY(
-				"SELECT c.CUI, c.STR, s.STY,c.SAB, sab.SVER FROM umls.MRCONSO as c, umls.MRSTY as s, umls.MRSAB as sab "
-						+ "WHERE c.CUI= ? AND c.cui = s.cui AND c.TS='P' and c.ISPREF = 'Y' and c.TS = 'P' and c.SUPPRESS = 'N' "
-						+ "AND c.SAB = sab.RSAB " + "order by sab.SVER DESC"),
+				"SELECT c.CUI, c.STR, s.STY,c.SAB, sab.SVER FROM umls.MRCONSO as c, umls.MRSTY as s, umls.MRSAB as sab WHERE c.CUI= ? AND c.cui = s.cui AND (c.TS='P'OR c.TS='S') AND c.SAB = sab.RSAB "
+						+ "order by sab.SVER DESC"),
 		MAPPING_QUERY(
 				"SELECT c.CUI, c.CODE, c.STR, s.STY, sab.RSAB,sab.SON, sab.SVER FROM umls.MRCONSO as c, umls.MRSTY as s, umls.MRSAB as sab "
 						+ "WHERE c.CUI= ? AND c.cui = s.cui AND TS='P' AND c.SAB<> 'MTH' AND c.SAB=sab.RSAB and sab.VCUI IS NOT NULL "
@@ -61,15 +61,25 @@ public class UMLSQuery {
 		return model;
 	}
 
-	public Map<String, String[]> searchByString(String term) {
-		Map<String, String[]> map = new LinkedHashMap<>();
+	public CodeSystem searchByString(String term) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId(term);
+		codeSystem.setTitle("UMLS codes with label starting with - " + term);
+		codeSystem.setExperimental(true);
+		codeSystem.setContact(UMLSFHIRModel.getContactDetails());
+		codeSystem.setContent(CodeSystemContentMode.FRAGMENT);
+		codeSystem.setDescriptionElement(new MarkdownType("### UMLS with FHIR"
+				+ ">The CodeSystem instance captures all the concepts (CodeSystem.cocnept) whose label contains the search string."));
 		try {
-			log.info("Hibernate session opened");
+			log.info("Hibernate session opened - searchString");
 			session = HibernateConfig.getSession();
 			List<Object[]> results = session.createNativeQuery(Queries.CUI_QUERY.query).setParameter(1, term + "%")
 					.list();
 			for (Object[] o : results) {
-				map.put(o[0].toString(), new String[] { o[0].toString(), o[1].toString() });
+				CodeSystem.ConceptDefinitionComponent cd = new CodeSystem.ConceptDefinitionComponent();
+				cd.setCode(o[0].toString());
+				cd.setDisplay(o[1].toString());
+				codeSystem.addConcept(cd);
 			}
 			HibernateConfig.closeSession(session);
 			log.info("Hibernate session closed");
@@ -78,8 +88,35 @@ public class UMLSQuery {
 			session.getTransaction().rollback();
 			log.error(e.getMessage(), e);
 		}
-		return map;
+		return codeSystem;
 	}
+
+	/*
+	 * public List<Coding> searchByString(String term) { List<Coding> map = new
+	 * ArrayList<Coding>(); try { log.info("Hibernate session opened"); session =
+	 * HibernateConfig.getSession(); List<Object[]> results =
+	 * session.createNativeQuery(Queries.CUI_QUERY.query).setParameter(1, term +
+	 * "%") .list();
+	 * 
+	 * for (Object[] o : results) { // map.add(o[0].toString(), new String[] {
+	 * o[0].toString(), o[1].toString() }); Coding c = new Coding();
+	 * c.setCode(o[0].toString()); c.setDisplay(o[1].toString());
+	 * c.setVersion("2019AB"); c.setSystem("https://uts.nlm.nih.gov"); map.add(c); }
+	 * HibernateConfig.closeSession(session); log.info("Hibernate session closed");
+	 * } catch (Exception e) { e.printStackTrace(System.out);
+	 * session.getTransaction().rollback(); log.error(e.getMessage(), e); } return
+	 * map; } /* public Map<String, String[]> searchByString(String term) {
+	 * Map<String, String[]> map = new LinkedHashMap<>(); try {
+	 * log.info("Hibernate session opened"); session = HibernateConfig.getSession();
+	 * List<Object[]> results =
+	 * session.createNativeQuery(Queries.CUI_QUERY.query).setParameter(1, term +
+	 * "%") .list(); for (Object[] o : results) { map.put(o[0].toString(), new
+	 * String[] { o[0].toString(), o[1].toString() }); }
+	 * HibernateConfig.closeSession(session); log.info("Hibernate session closed");
+	 * } catch (Exception e) { e.printStackTrace(System.out);
+	 * session.getTransaction().rollback(); log.error(e.getMessage(), e); } return
+	 * map; }
+	 */
 
 	public ConceptMap getModel(String cui, char type) {
 		session = HibernateConfig.getSession();

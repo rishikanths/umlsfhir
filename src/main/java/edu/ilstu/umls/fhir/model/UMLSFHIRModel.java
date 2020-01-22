@@ -159,20 +159,7 @@ public class UMLSFHIRModel extends ConceptMap {
 		model.setExperimental(true);
 		model.setPublisher("Rishi Saripalle - Illinois State University");
 
-		ContactPoint cp = new ContactPoint();
-		cp.setSystem(ContactPointSystem.EMAIL);
-		cp.setValue("rishi.saripalle@ilstu.edu");
-		cp.setUse(ContactPointUse.WORK);
-
-		ContactDetail cd = new ContactDetail();
-		cd.setName("Rishi Saripalle");
-		List<ContactPoint> contacts = new ArrayList<ContactPoint>();
-		contacts.add(cp);
-		cd.setTelecom(contacts);
-
-		List<ContactDetail> contactDetails = new ArrayList<ContactDetail>();
-		contactDetails.add(cd);
-		model.setContact(contactDetails);
+		model.setContact(getContactDetails());
 
 		ConceptMapGroupComponent group = new ConceptMapGroupComponent();
 		group.setSource("http://nlm.nih.gov/research/umls");
@@ -197,6 +184,12 @@ public class UMLSFHIRModel extends ConceptMap {
 		map.setExperimental(true);
 		map.setPublisher("Rishi Saripalle - Illinois State University");
 
+		map.setContact(getContactDetails());
+
+		return map;
+	}
+
+	public static List<ContactDetail> getContactDetails() {
 		ContactPoint cp = new ContactPoint();
 		cp.setSystem(ContactPointSystem.EMAIL);
 		cp.setValue("rishi.saripalle@ilstu.edu");
@@ -210,8 +203,8 @@ public class UMLSFHIRModel extends ConceptMap {
 
 		List<ContactDetail> contactDetails = new ArrayList<ContactDetail>();
 		contactDetails.add(cd);
-		map.setContact(contactDetails);
 
-		return map;
+		return contactDetails;
+
 	}
 }

@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
+/*import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.StringParam;*/
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import edu.ilstu.umls.fhir.db.UMLSQuery;
 
