@@ -38,7 +38,7 @@ public class ConceptMapProvider implements IResourceProvider {
         String code = id.getIdPart();
         log.info("Preparing ConceptMap for CUI - " + code);
         try {
-            return new UMLSQuery().getModel(code, 'a');
+            return new UMLSQuery().generateConceptMap(code, 'a');
         } catch (Exception e) {
             log.error(e.getMessage(), e.getCause());
         }

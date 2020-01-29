@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import edu.ilstu.umls.fhir.model.CodeProvider;
+import edu.ilstu.umls.fhir.model.CodeSystemProvider;
 import edu.ilstu.umls.fhir.model.ConceptMapProvider;
 
 @WebServlet(value = "/umlsfhir/*")
@@ -21,7 +21,9 @@ public class FHIRServer extends RestfulServer {
 
     private static final long serialVersionUID = 1L;
 
-    private final String BASE_URL = "http://umls.it.ilstu.edu/umlsfhir/";
+    public final String BASE_URL = "http://umls.it.ilstu.edu/umlsfhir/";
+
+    public final static FhirContext appFHIRContext = FhirContext.forR4();
 
     public FHIRServer() {
         log.info("Calling the FHIRServer constructor");
@@ -30,10 +32,10 @@ public class FHIRServer extends RestfulServer {
 
     @Override
     protected void initialize() throws ServletException {
-        setFhirContext(FhirContext.forR4());
+        setFhirContext(appFHIRContext);
         log.debug("Set the FHIR Context to R4");
         registerProvider(new ConceptMapProvider());
-        registerProvider(new CodeProvider());
+        registerProvider(new CodeSystemProvider());
         LoggingInterceptor loginIntercepter = new LoggingInterceptor();
         loginIntercepter.setLogger(log);
         loginIntercepter.setMessageFormat(
