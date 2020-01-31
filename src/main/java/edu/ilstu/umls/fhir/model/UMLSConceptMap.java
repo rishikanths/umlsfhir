@@ -7,7 +7,6 @@ package edu.ilstu.umls.fhir.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactDetail;
