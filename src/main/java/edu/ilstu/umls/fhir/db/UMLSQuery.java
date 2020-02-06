@@ -25,7 +25,7 @@ import edu.ilstu.umls.fhir.model.UMLSConceptMap.UMLSTargetElementComponent;
 @SuppressWarnings({ "unchecked", "deprecation" })
 public class UMLSQuery {
 
-	public enum Queries {
+	public static enum Queries {
 
 		SEARCH_QUERY("SELECT c.CUI, STR, STY from umls.MRCONSO as c, umls.MRSTY as s "
 				+ "WHERE LAT='ENG' AND c.CUI = s.CUI AND STR LIKE ? GROUP BY c.CUI ORDER BY c.STR ASC"),
@@ -45,7 +45,7 @@ public class UMLSQuery {
 
 		SEMANTIC_TYPE_QUERY("SELECT TUI, STY FROM umls.MRSTY WHERE CUI = ?");
 
-		private String query;
+		public String query;
 
 		Queries(String query) {
 			this.query = query;
@@ -55,10 +55,18 @@ public class UMLSQuery {
 
 	private static final Logger log = LoggerFactory.getLogger(UMLSQuery.class);
 	private Session session = null;
-	private UMLSConceptMap model = UMLSConceptMap.getDefaultUMLSConceptMap();
 	private UMLSConceptMap.UMLSSourceElementComponent sourceElement = new UMLSSourceElementComponent();
 
-	public CodeSystem searchByString(String term) {
+	public UMLSQuery() {
+		try {
+			session = HibernateConfig.getSession();
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+			log.error(e.getMessage(), e);
+		}
+	}
+
+	public CodeSystem searchByString(String term, String query) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setId(term);
 		codeSystem.setUrl(UMLSConceptMap.UMLS_URL + "CodeSystem?search=" + term);
@@ -72,8 +80,7 @@ public class UMLSQuery {
 				+ ">The CodeSystem instance captures all the concepts (CodeSystem.cocnept) whose label contains the search string."));
 		try {
 			session = HibernateConfig.getSession();
-			List<Object[]> results = session.createNativeQuery(Queries.SEARCH_QUERY.query).setParameter(1, term + "%")
-					.list();
+			List<Object[]> results = session.createNativeQuery(query).setParameter(1, term + "%").list();
 			for (Object[] o : results) {
 				CodeSystem.ConceptDefinitionComponent cd = new CodeSystem.ConceptDefinitionComponent();
 				cd.setCode(o[0].toString());
@@ -89,28 +96,9 @@ public class UMLSQuery {
 		return codeSystem;
 	}
 
-	public ConceptMap generateConceptMap(String cui, char type) {
-		session = HibernateConfig.getSession();
-		model.setUrl(model.getUrl() + "ConceptMap/" + cui);
-		model.setId(cui);
-		getCUIInformation(cui);
-		if (type == 'a') {
-			queryCUI(cui, UMLSQuery.Queries.MAPPING_QUERY.query);
-			queryCUIRelations(cui, UMLSQuery.Queries.HIERARCHY_QUERY);
-			queryCUIRelations(cui, UMLSQuery.Queries.RELATION_QUERY);
-		} else if (type == 'c') {
-			queryCUI(cui, UMLSQuery.Queries.MAPPING_QUERY.query);
-		} else if (type == 'h') {
-			queryCUIRelations(cui, UMLSQuery.Queries.HIERARCHY_QUERY);
-		} else if (type == 'r') {
-			queryCUIRelations(cui, UMLSQuery.Queries.RELATION_QUERY);
-		}
-		HibernateConfig.closeSession(session);
-		return model;
-	}
-
-	private void queryCUI(String cui, String query) {
+	public void generateCUIAtomsConcetpMap(ConceptMap model, String cui, String query) {
 		try {
+			getCUIInformation(cui);
 			List<Object[]> results = session.createNativeQuery(query).setParameter(1, cui).list();
 			UMLSConceptMap.UMLSSourceElementComponent source = null;
 			ConceptMapGroupComponent group = null;
@@ -154,9 +142,10 @@ public class UMLSQuery {
 		}
 	}
 
-	private void queryCUIRelations(String cui, UMLSQuery.Queries query) {
+	public void generateCUIRelationsConcetpMap(ConceptMap model, String cui, String query, boolean hierarchy) {
 		try {
-			List<Object[]> results = session.createNativeQuery(query.query).setParameter(1, cui).list();
+			getCUIInformation(cui);
+			List<Object[]> results = session.createNativeQuery(query).setParameter(1, cui).list();
 			UMLSConceptMap.UMLSSourceElementComponent source = null;
 			ConceptMapGroupComponent group = null;
 			String sab = "";
@@ -190,7 +179,7 @@ public class UMLSQuery {
 				target.setDisplay(o[1].toString());
 				target.setEquivalence(getRelationMapping(o[2].toString()));
 				target.setSemanticType(getCUiSemanticType(o[0].toString()));
-				if (o[3] != null && query != UMLSQuery.Queries.HIERARCHY_QUERY) {
+				if (o[3] != null && hierarchy) {
 					target.setMappingLabel(o[3].toString());
 				}
 
@@ -204,7 +193,7 @@ public class UMLSQuery {
 		}
 	}
 
-	public ConceptMapEquivalence getRelationMapping(String RELA) {
+	private ConceptMapEquivalence getRelationMapping(String RELA) {
 
 		switch (RELA) {
 		case "RU":

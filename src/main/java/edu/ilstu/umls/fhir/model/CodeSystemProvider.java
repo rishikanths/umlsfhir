@@ -28,7 +28,7 @@ public class CodeSystemProvider implements IResourceProvider {
         String searchString = string.getValue();
         log.info("Preparing CodeSystem  for search string - " + searchString);
         try {
-            return new UMLSQuery().searchByString(searchString);
+            return new UMLSQuery().searchByString(searchString, UMLSQuery.Queries.SEARCH_QUERY.query);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getCause());
         }

@@ -6,7 +6,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
 import org.hibernate.service.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +18,13 @@ public class HibernateConfig {
 
 	private static ServiceRegistry reg = null;
 
-	public static void buildSessionFactory() {
+	public static void buildSessionFactory(Properties dbProperties) {
 		if (sessionFactory == null) {
 			log.info("Creating the session factory");
 			Configuration cfg = null;
 			try {
 				cfg = new Configuration();
-				cfg.setProperties(getHibernateProperties());
+				cfg.setProperties(dbProperties);
 				reg = new StandardServiceRegistryBuilder().applySettings(cfg.getProperties()).build();
 				sessionFactory = cfg.buildSessionFactory(reg);
 			} catch (Exception e) {
@@ -68,25 +67,6 @@ public class HibernateConfig {
 		} catch (Throwable t) {
 			log.error(t.getMessage(), t);
 		}
-	}
-
-	private static Properties getHibernateProperties() {
-		Properties p = new Properties();
-		p.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
-		p.put(Environment.URL, "jdbc:mysql://10.110.10.130:3306/umls");
-		p.put(Environment.USER, "root");
-		p.put(Environment.PASS, "umls");
-		p.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
-		p.put(Environment.SHOW_SQL, false);
-		p.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-		p.put(Environment.GENERATE_STATISTICS, false);
-
-		p.put(Environment.C3P0_ACQUIRE_INCREMENT, 1);
-		p.put(Environment.C3P0_MIN_SIZE, 5);
-		p.put(Environment.C3P0_MAX_SIZE, 10);
-		p.put(Environment.C3P0_IDLE_TEST_PERIOD, 3000);
-		p.put(Environment.C3P0_TIMEOUT, 0);
-		return p;
 	}
 
 }

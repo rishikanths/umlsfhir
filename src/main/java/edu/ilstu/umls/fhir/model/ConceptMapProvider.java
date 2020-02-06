@@ -31,7 +31,13 @@ public class ConceptMapProvider implements IResourceProvider {
         String code = id.getIdPart();
         log.info("Preparing ConceptMap for CUI - " + code);
         try {
-            return new UMLSQuery().generateConceptMap(code, 'a');
+            UMLSConceptMap model = UMLSConceptMap.getDefaultUMLSConceptMap();
+            UMLSQuery query = new UMLSQuery();
+            query.generateCUIAtomsConcetpMap(model, code, UMLSQuery.Queries.MAPPING_QUERY.query);
+            query.generateCUIRelationsConcetpMap(model, code, UMLSQuery.Queries.HIERARCHY_QUERY.query, true);
+            query.generateCUIRelationsConcetpMap(model, code, UMLSQuery.Queries.RELATION_QUERY.query, false);
+
+            return model;
         } catch (Exception e) {
             log.error(e.getMessage(), e.getCause());
         }
