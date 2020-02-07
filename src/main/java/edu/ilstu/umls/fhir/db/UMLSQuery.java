@@ -144,7 +144,8 @@ public class UMLSQuery {
 
 	public void generateCUIRelationsConcetpMap(ConceptMap model, String cui, String query, boolean hierarchy) {
 		try {
-			getCUIInformation(cui);
+			if (sourceElement == null)
+				getCUIInformation(cui);
 			List<Object[]> results = session.createNativeQuery(query).setParameter(1, cui).list();
 			UMLSConceptMap.UMLSSourceElementComponent source = null;
 			ConceptMapGroupComponent group = null;
@@ -228,6 +229,8 @@ public class UMLSQuery {
 			List<Object[]> results = session.createNativeQuery(Queries.MTH_QUERY.query).setParameter(1, cui).list();
 			if (results.size() == 0)
 				results = session.createNativeQuery(Queries.PREF_CUI_QUERY.query).setParameter(1, cui).list();
+			if (results.size() == 0)
+				throw new IllegalArgumentException("Entered CUI - " + cui + " doesnt exist");
 			Object[] r = results.get(0);
 			sourceElement.setCode(r[0].toString());
 			sourceElement.setDisplay(r[1].toString());
