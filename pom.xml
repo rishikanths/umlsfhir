@@ -78,6 +78,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>umlsfhir</finalName>
 		<!-- 
 		The following is not required for the application to build, but
 		allows you to test it by issuing "mvn jetty:run" from the command

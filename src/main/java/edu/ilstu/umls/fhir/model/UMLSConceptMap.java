@@ -27,7 +27,7 @@ public class UMLSConceptMap extends ConceptMap {
 
 	private static final long serialVersionUID = 1;
 
-	public static final String UMLS_URL = "http://nlm.nih.gov/research/umls/";
+	public static final String UMLS_URL = "https://uts-ws.nlm.nih.gov";
 
 	public static final String UMLS_VER = "2019AB";
 

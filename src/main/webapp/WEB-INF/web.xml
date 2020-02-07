@@ -1,6 +1,10 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
 
 	<display-name>UMLS using FHIR</display-name>
+	<servlet>
+		<servlet-name>FHIRSeervlet</servlet-name>
+		<servlet-class>edu.ilstu.umls.fhir.server.FHIRServer</servlet-class>
+	</servlet>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>

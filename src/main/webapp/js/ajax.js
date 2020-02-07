@@ -24,10 +24,10 @@ $("#termSearch").autocomplete(
 		delay: 200,
 		source: function (req, resp) {
 			$.ajax({
-				url: '/umlsfhir/CodeSystem?search=' + $('#termSearch').val(),
+				url: window.location.protocol + "//" + window.location.host + '/umlsfhir/fhir/CodeSystem?search=' + $('#termSearch').val(),
 				success: function (data, status, response) {
 					var object = data["entry"][0]["resource"]["concept"];
-					if (object.length == 0) {
+					if (object == null) {
 						var msg = "No matches found for term - <b>" + $('#termSearch').val() + "</b>";
 						displayMessage(msg);
 						setFocus();
@@ -63,7 +63,7 @@ $("#termSearch").autocomplete(
 function getConceptMap(cui, type) {
 
 	$.ajax({
-		url: '/umlsfhir/ConceptMap/' + cui,
+		url: window.location.protocol + "//" + window.location.host + '/umlsfhir/fhir/ConceptMap/' + cui,
 		success: function (data, status, response) {
 			$("#jsonSection").LoadingOverlay("hide");
 			$("#copyButton").css("display", "inline");
