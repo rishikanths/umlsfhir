@@ -12,6 +12,8 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import edu.ilstu.umls.fhir.model.CodeSystemProvider;
 import edu.ilstu.umls.fhir.model.ConceptMapProvider;
+import edu.ilstu.umls.fhir.model.ExtensionsProvider;
+import edu.ilstu.umls.fhir.model.UMLSRelationTypeCodeValueSetProvider;
 
 @WebServlet(value = "/fhir/*")
 public class FHIRServer extends RestfulServer {
@@ -35,6 +37,8 @@ public class FHIRServer extends RestfulServer {
         try {
             registerProvider(new ConceptMapProvider());
             registerProvider(new CodeSystemProvider());
+            registerProvider(new UMLSRelationTypeCodeValueSetProvider());
+            registerProvider(new ExtensionsProvider());
             LoggingInterceptor loginIntercepter = new LoggingInterceptor();
             loginIntercepter.setLogger(log);
             loginIntercepter.setMessageFormat(

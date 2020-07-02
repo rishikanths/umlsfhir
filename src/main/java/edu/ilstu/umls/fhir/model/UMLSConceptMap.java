@@ -7,10 +7,13 @@ package edu.ilstu.umls.fhir.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Configuration;
 import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -21,13 +24,15 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import edu.ilstu.umls.fhir.model.UMLSRelationCodeEnumeration.UMLSRelationTypeCodeEnumFactory;
+import edu.ilstu.umls.fhir.model.UMLSRelationCodeEnumeration.UMLSRelationCode;
 
-@ResourceDef(name = "UMLSConceptMap", profile = "http://umls.it.ilstu.edu/fhir/StructureDefinition/UMLSConceptMap")
+@ResourceDef(name = "ConceptMap", profile = "http://umls.it.ilstu.edu/umlsfhi/fhir/StructureDefinition/UMLSConceptMap")
 public class UMLSConceptMap extends ConceptMap {
 
 	private static final long serialVersionUID = 1;
 
-	public static final String UMLS_URL = "https://uts-ws.nlm.nih.gov";
+	public static final String UMLS_URL = "https://www.nlm.nih.gov/research/umls/";
 
 	public static final String UMLS_VER = "2019AB";
 
@@ -38,8 +43,8 @@ public class UMLSConceptMap extends ConceptMap {
 
 		@Child(name = "semanticType", type = {
 				Coding.class }, min = 1, max = Child.MAX_UNLIMITED, modifier = false, summary = false)
-		@Extension(url = "http://hl7.org/fhir/StructureDefinition/concept-code-semantictype", definedLocally = true, isModifier = false)
-		@Description(shortDefinition = "Semantic type of the source code", formalDefinition = "Semantic type of the source code assigned by NLM from UMLS Semantic Network.")
+		@Extension(url = "http://umls.it.ilstu.edu/umlsfhir/fhir/StructureDefinition/conceptmap-code-semantic-type", definedLocally = true, isModifier = false)
+		@Description(shortDefinition = "Semantic type of the code", formalDefinition = "Semantic type of an atom or concept assigned by NLM from UMLS Semantic Network.")
 		protected List<Coding> semanticType;
 
 		public List<Coding> getSemanticType() {
@@ -70,14 +75,19 @@ public class UMLSConceptMap extends ConceptMap {
 		private static final long serialVersionUID = 1;
 
 		@Child(name = "semanticType", type = { Coding.class }, min = 1, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://hl7.org/fhir/StructureDefinition/conceptmap-code-semantictype", definedLocally = true, isModifier = false)
-		@Description(shortDefinition = "Semantic type of the source code", formalDefinition = "Semantic type of the source code assigned by NLM from UMLS Semantic Network.")
+		@Extension(url = "http://umls.it.ilstu.edu/umlsfhir/fhir/StructureDefinition/conceptmap-code-semantic-type", definedLocally = true, isModifier = false)
+		@Description(shortDefinition = "Semantic type of the code", formalDefinition = "Semantic type of an atom/concept assigned by NLM from UMLS Semantic Network.")
 		protected List<Coding> semanticType;
 
 		@Child(name = "mappingLabel", type = { StringType.class }, min = 0, max = 1)
-		@Extension(url = "http://hl7.org/fhir/StructureDefinition/conceptmap-target-mappingLabel", definedLocally = true, isModifier = false)
+		@Extension(url = "http://umls.it.ilstu.edu/umlsfhir/fhir/StructureDefinition/conceptmap-target-mapping-label", definedLocally = true, isModifier = false)
 		@Description(shortDefinition = "Additional information on the nature of relationship between source and target", formalDefinition = "The relationship label between the source and target concepts. The relationship is read from target to source (e.g. the target 'has manifestation' source).")
 		protected StringType mappingLabel;
+
+		@Child(name = "mappingType", type = { CodeType.class }, min = 1, max = 1)
+		@Extension(url = "http://umls.it.ilstu.edu/umlsfhir/fhir/StructureDefinition/conceptmap-target-mapping-type", definedLocally = true, isModifier = false)
+		@Description(shortDefinition = "The type of relationship between source and target", formalDefinition = "The relationship type (REL) between the source and target concepts.")
+		protected Enumeration<UMLSRelationCode> mappingType;
 
 		public List<Coding> getSemanticType() {
 			return semanticType;
@@ -109,6 +119,23 @@ public class UMLSConceptMap extends ConceptMap {
 			mappingLabel.setValueAsString(type);
 			return this;
 		}
+
+		public Enumeration<UMLSRelationCode> getMappingType() {
+			if (this.mappingType == null)
+				if (Configuration.errorOnAutoCreate())
+					throw new Error("Attempt to auto-create TargetElementComponent.equivalence");
+				else if (Configuration.doAutoCreate())
+					this.mappingType = new Enumeration<UMLSRelationCode>(new UMLSRelationTypeCodeEnumFactory()); // bb
+			return this.mappingType;
+		}
+
+		public UMLSTargetElementComponent setMappingType(UMLSRelationCode type) {
+			if (this.mappingType == null)
+				this.mappingType = new Enumeration<UMLSRelationCode>(new UMLSRelationTypeCodeEnumFactory());
+			this.mappingType.setValue(type);
+			return this;
+		}
+
 	}
 
 	public static UMLSConceptMap getDefaultUMLSConceptMap() {

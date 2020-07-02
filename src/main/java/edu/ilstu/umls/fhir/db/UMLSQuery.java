@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemHierarchyMeaning;
 
 import edu.ilstu.umls.fhir.model.UMLSConceptMap;
+import edu.ilstu.umls.fhir.model.UMLSRelationCodeEnumeration.UMLSRelationCode;
 import edu.ilstu.umls.fhir.model.UMLSConceptMap.UMLSSourceElementComponent;
 import edu.ilstu.umls.fhir.model.UMLSConceptMap.UMLSTargetElementComponent;
 
@@ -69,7 +70,7 @@ public class UMLSQuery {
 	public CodeSystem searchByString(String term, String query) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setId(term);
-		codeSystem.setUrl(UMLSConceptMap.UMLS_URL + "CodeSystem?search=" + term);
+		codeSystem.setUrl("http://umls.it.ilstu.edu/umlsfhir/fhir/CodeSystem?search=" + term);
 		codeSystem.setTitle("List of UMLS concepts with name starting with - " + term);
 		codeSystem.setStatus(PublicationStatus.DRAFT);
 		codeSystem.setExperimental(true);
@@ -77,7 +78,7 @@ public class UMLSQuery {
 		codeSystem.setContent(CodeSystemContentMode.FRAGMENT);
 		codeSystem.setHierarchyMeaning(CodeSystemHierarchyMeaning.ISA);
 		codeSystem.setDescriptionElement(new MarkdownType("### UMLS with FHIR"
-				+ ">The CodeSystem instance captures all the concepts (CodeSystem.cocnept) whose label contains the search string."));
+				+ "The CodeSystem instance captures the concepts (CodeSystem.cocnept) whose offical NLM provided name contains the search string."));
 		try {
 			session = HibernateConfig.getSession();
 			List<Object[]> results = session.createNativeQuery(query).setParameter(1, term + "%").list();
@@ -178,9 +179,10 @@ public class UMLSQuery {
 				UMLSConceptMap.UMLSTargetElementComponent target = new UMLSTargetElementComponent();
 				target.setCode(o[0].toString());
 				target.setDisplay(o[1].toString());
-				target.setEquivalence(getRelationMapping(o[2].toString()));
+				// target.setEquivalence(getRelationMapping(o[2].toString()));
+				target.setMappingType(getRelationMapping(o[2].toString()));
 				target.setSemanticType(getCUiSemanticType(o[0].toString()));
-				if (o[3] != null && hierarchy) {
+				if (o[3] != null && !hierarchy) {
 					target.setMappingLabel(o[3].toString());
 				}
 
@@ -194,33 +196,35 @@ public class UMLSQuery {
 		}
 	}
 
-	private ConceptMapEquivalence getRelationMapping(String RELA) {
+	private UMLSRelationCode getRelationMapping(String RELA) {
 
 		switch (RELA) {
 		case "RU":
-			return ConceptMapEquivalence.RELATEDTO;
+			return UMLSRelationCode.RU;
 		case "RO":
-			return ConceptMapEquivalence.RELATEDTO;
+			return UMLSRelationCode.RO;
 		case "RB":
-			return ConceptMapEquivalence.WIDER;
+			return UMLSRelationCode.RB;
 		case "RL":
-			return ConceptMapEquivalence.EQUIVALENT;
+			return UMLSRelationCode.RL;
 		case "RQ":
-			return ConceptMapEquivalence.EQUIVALENT;
+			return UMLSRelationCode.RQ;
 		case "SY":
-			return ConceptMapEquivalence.EQUIVALENT;
+			return UMLSRelationCode.SY;
 		case "PAR":
-			return ConceptMapEquivalence.SUBSUMES;
+			return UMLSRelationCode.PAR;
 		case "RN":
-			return ConceptMapEquivalence.NARROWER;
+			return UMLSRelationCode.RN;
 		case "SIB":
-			return ConceptMapEquivalence.SPECIALIZES;
+			return UMLSRelationCode.SIB;
 		case "CHD":
-			return ConceptMapEquivalence.SPECIALIZES;
+			return UMLSRelationCode.CHD;
 		case "XR":
-			return ConceptMapEquivalence.UNMATCHED;
+			return UMLSRelationCode.XR;
+		case "":
+			return UMLSRelationCode.EMPTY;
 		default:
-			return ConceptMapEquivalence.UNMATCHED;
+			return UMLSRelationCode.XR;
 		}
 	}
 
