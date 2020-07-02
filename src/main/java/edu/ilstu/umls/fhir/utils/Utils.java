@@ -14,9 +14,9 @@ public class Utils {
     public static Properties getHibernateProperties() {
         Properties p = new Properties();
         p.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
-        p.put(Environment.URL, "jdbc:mysql://address:port/db_name");
-        p.put(Environment.USER, "user");
-        p.put(Environment.PASS, "password");
+        p.put(Environment.URL, "jdbc:mysql://10.110.10.130:3306/umls");
+        p.put(Environment.USER, "root");
+        p.put(Environment.PASS, "umls");
         p.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
         p.put(Environment.SHOW_SQL, false);
         p.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
