@@ -14,7 +14,7 @@ public class Utils {
     public static Properties getHibernateProperties() {
         Properties p = new Properties();
         p.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
-        p.put(Environment.URL, "jdbc:mysql://10.110.10.130:3306/umls");
+        p.put(Environment.URL, "jdbc:mysql://10.110.10.130:3306/umls?serverTimezone=America/Chicago");
         p.put(Environment.USER, "root");
         p.put(Environment.PASS, "umls");
         p.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
