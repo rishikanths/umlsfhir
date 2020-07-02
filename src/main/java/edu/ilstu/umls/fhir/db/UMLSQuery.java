@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.CodeSystem.CodeSystemHierarchyMeaning;
 
 import edu.ilstu.umls.fhir.model.UMLSConceptMap;
 import edu.ilstu.umls.fhir.model.UMLSRelationCodeEnumeration.UMLSRelationCode;
+import edu.ilstu.umls.fhir.utils.Utils;
 import edu.ilstu.umls.fhir.model.UMLSConceptMap.UMLSSourceElementComponent;
 import edu.ilstu.umls.fhir.model.UMLSConceptMap.UMLSTargetElementComponent;
 
@@ -70,7 +71,7 @@ public class UMLSQuery {
 	public CodeSystem searchByString(String term, String query) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setId(term);
-		codeSystem.setUrl("http://umls.it.ilstu.edu/umlsfhir/fhir/CodeSystem?search=" + term);
+		codeSystem.setUrl(Utils.BASE_URL + "/umlsfhir/fhir/CodeSystem?search=" + term);
 		codeSystem.setTitle("List of UMLS concepts with name starting with - " + term);
 		codeSystem.setStatus(PublicationStatus.DRAFT);
 		codeSystem.setExperimental(true);
@@ -112,8 +113,8 @@ public class UMLSQuery {
 					sab = newSab;
 					version = newVersion;
 					group = new ConceptMapGroupComponent();
-					group.setSource(UMLSConceptMap.UMLS_URL);
-					group.setSourceVersion(UMLSConceptMap.UMLS_VER);
+					group.setSource(Utils.UMLS_URL);
+					group.setSourceVersion(Utils.UMLS_VER);
 					group.setTarget("urn:umls:" + o[5].toString() + ":" + o[7].toString());
 					group.setTargetVersion(o[7].toString());
 					List<SourceElementComponent> sources = new ArrayList<>();
@@ -161,8 +162,8 @@ public class UMLSQuery {
 					sab = newSab;
 					version = newVersion;
 					group = new ConceptMapGroupComponent();
-					group.setSource(UMLSConceptMap.UMLS_URL);
-					group.setSourceVersion(UMLSConceptMap.UMLS_VER);
+					group.setSource(Utils.UMLS_URL);
+					group.setSourceVersion(Utils.UMLS_VER);
 					group.setTarget("urn:umls:" + o[5].toString() + ":" + newVersion);
 					group.setTargetVersion(newVersion);
 					List<SourceElementComponent> sources = new ArrayList<>();
@@ -255,7 +256,7 @@ public class UMLSQuery {
 					.list();
 			for (Object[] o : results) {
 				Coding semanticType = new Coding();
-				semanticType.setSystem(UMLSConceptMap.UMLS_URL);
+				semanticType.setSystem(Utils.UMLS_URL);
 				semanticType.setCode(o[0].toString());
 				semanticType.setDisplay(o[1].toString());
 				semanticTypes.add(semanticType);

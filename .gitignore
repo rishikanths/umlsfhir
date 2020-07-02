@@ -1,6 +1,5 @@
-logs/
-.mtj.tmp/
 *.class
+*.log
 *.jar
 *.war
 *.ear
